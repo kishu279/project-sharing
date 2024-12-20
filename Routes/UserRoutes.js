@@ -4,9 +4,20 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
+//Models
 const UserModel = require("./../Models/userModel");
+const projectModel = require("./../Models/projectModel");
+
+//Auth
+const auth = require("./../Middleware/Auth");
 
 const router = express.Router();
+
+async function tokenCreation(email) {
+  return await jwt.sign({ email: email }, process.env.JWT_KEY, {
+    expiresIn: "1h",
+  });
+}
 
 router.post("/signup", async (req, res) => {
   const { name, email, pass } = req.body;
@@ -19,7 +30,7 @@ router.post("/signup", async (req, res) => {
   }
 
   try {
-    const found = await UserModel.findOne({ userEmail: email });
+    const found = await UserModel.findOne({ email });
 
     if (found) {
       return res.status(404).json({
@@ -36,7 +47,7 @@ router.post("/signup", async (req, res) => {
       userPassword: hashpass,
     });
 
-    const token = await jwt.sign({ email: email }, process.env.JWT_KEY);
+    const token = tokenCreation(email); //Jwt token is created
 
     return res.status(200).json({
       success: true,
@@ -48,6 +59,38 @@ router.post("/signup", async (req, res) => {
       success: false,
       message: error,
     });
+  }
+});
+
+router.post("/signin", auth, async (req, res) => {
+  const { email, pass } = req.body;
+
+  try {
+    const user = await UserModel.findOne({ userEmail: email });
+
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        message: "no such user",
+      });
+    }
+
+    if (!(await bcrypt.compare(pass, user.userPassword))) {
+      return res.status(400).json({
+        success: false,
+        message: "Authentication failed",
+      });
+    }
+
+    const token = await tokenCreation(email);
+
+    return res.status(200).json({
+      success: true,
+      messaage: "Authentication Success",
+      token: token,
+    });
+  } catch (error) {
+    console.log(error);
   }
 });
 
