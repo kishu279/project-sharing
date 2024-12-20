@@ -28,6 +28,4 @@ async function main() {
 
 app.use("/", UserRoutes);
 
-app.use("/", UserCard);
-
 main();

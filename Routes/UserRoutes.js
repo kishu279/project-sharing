@@ -5,70 +5,50 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
 const UserModel = require("./../Models/userModel");
-const auth = require("./../Middleware/Auth");
 
 const router = express.Router();
 
 router.post("/signup", async (req, res) => {
-  const { uName, uEmail, uPass } = req.body;
+  const { name, email, pass } = req.body;
 
-  if (!uName || !uEmail || !uPass) {
-    return res.status(400).json({
+  if (!name || !email || !pass) {
+    return res.status(404).json({
       success: false,
-      message: "Condition do not meet",
+      message: "required fields are not satisfied",
     });
   }
 
   try {
-    const user = await UserModel.findOne({ userEmail: uEmail });
+    const found = await UserModel.findOne({ userEmail: email });
 
-    if (user) {
-      return res.status(400).json({
+    if (found) {
+      return res.status(404).json({
         success: false,
         message: "user already exists",
       });
     }
 
-    const hashPass = await bcrypt.hash(uPass, 7);
+    const hashpass = await bcrypt.hash(pass, 10);
 
-    const newUser = await new UserModel({
-      userName: uName,
-      userEmail: uEmail,
-      userPassword: hashPass,
+    await UserModel.create({
+      userName: name,
+      userEmail: email,
+      userPassword: hashpass,
     });
 
-    newUser.save();
-
-    console.log(newUser.id);
-    const sessionKey = jwt.sign(
-      //Json web Token
-      { id: newUser.id, creationTime: Date.now() },
-      process.env.JWT_KEY,
-      {
-        expiresIn: 60 * 60,
-      }
-    );
+    const token = await jwt.sign({ email: email }, process.env.JWT_KEY);
 
     return res.status(200).json({
       success: true,
-      meesage: "account created",
-      sessionKey: sessionKey,
+      message: "user created",
+      token: token,
     });
   } catch (error) {
-    return res.status(403).json({
+    return res.status(400).json({
       success: false,
       message: error,
     });
   }
-});
-
-router.post("/signin", auth, async (req, res) => {
-  const { uEmail } = req.body;
-
-  return res.status(200).json({
-    success: true,
-    message: `${uEmail} logged in successfully`,
-  });
 });
 
 module.exports = router;
