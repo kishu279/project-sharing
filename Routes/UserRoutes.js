@@ -45,7 +45,7 @@ router.post("/signup", async (req, res) => {
       { id: newUser.id, creationTime: Date.now() },
       process.env.JWT_KEY,
       {
-        expiresIn: 60,
+        expiresIn: 60 * 60,
       }
     );
 
@@ -63,14 +63,12 @@ router.post("/signup", async (req, res) => {
 });
 
 router.post("/signin", auth, async (req, res) => {
-  // const token = req.headers["authorization"].split(" ");
+  const { uEmail } = req.body;
 
-  // console.log(token[1]);
-  // return res.status(400).json({
-  //   success: true,
-  // });
-
-  console.log("succeddfully passed authentication middleware");
+  return res.status(200).json({
+    success: true,
+    message: `${uEmail} logged in successfully`,
+  });
 });
 
 module.exports = router;

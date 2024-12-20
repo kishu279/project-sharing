@@ -6,5 +6,9 @@ const projectSchema = mongoose.Schema({
   borrower: [{ type: mongoose.Schema.Types.ObjectId, ref: "UserModel" }],
   title: { type: String, required: true },
   buffer: { type: String },
-  createTIme: { type: date.now() },
+  createTime: { type: Date, default: Date.now() },
 });
+
+const ProjectModel = mongoose.model("ProjectModel", projectSchema);
+
+module.exports = ProjectModel;

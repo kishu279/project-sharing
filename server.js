@@ -1,7 +1,9 @@
 require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
+
 const UserRoutes = require("./Routes/UserRoutes");
+const UserCard = require("./Routes/UserCard");
 
 const app = express();
 const port = process.env.PORT;
@@ -25,5 +27,7 @@ async function main() {
 }
 
 app.use("/", UserRoutes);
+
+app.use("/", UserCard);
 
 main();
