@@ -19,31 +19,35 @@ const auth = async (req, res, next) => {
     return next();
   }
 
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_KEY);
-
-    const user = await UserModel.findOne({ userEmail: decoded.email });
-    if (
-      user &&
-      email === decoded.email &&
-      (await bcrypt.compare(pass, user.userPassword))
-    ) {
-      return res.status(200).json({
-        success: true,
-        message: "Authentication Success",
-      });
+  jwt.verify(token, process.env.JWT_KEY, async function (err, decoded) {
+    if (err) {
+      return next();
     }
 
-    return res.status(400).json({
-      success: false,
-      message: "Authentication failed",
-    });
-  } catch (error) {
-    return res.status(400).json({
-      success: false,
-      message: error,
-    });
-  }
+    try {
+      const user = await UserModel.findOne({ userEmail: decoded.email });
+      if (
+        user &&
+        email === decoded.email &&
+        (await bcrypt.compare(pass, user.userPassword))
+      ) {
+        return res.status(200).json({
+          success: true,
+          message: "Authentication Success",
+        });
+      }
+
+      return res.status(400).json({
+        success: false,
+        message: "Authentication failed",
+      });
+    } catch (error) {
+      return res.status(400).json({
+        success: false,
+        message: error,
+      });
+    }
+  });
 };
 
 module.exports = auth;
