@@ -1,7 +1,10 @@
+require("dotenv").config();
 const expresss = require("express");
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 
 const db = require("./../db/index.js");
+const { PRIVATE_KEY } = process.env;
 const router = expresss.Router();
 
 router.post("/signup", async (req, res) => {
@@ -55,9 +58,25 @@ router.post("/signin", async (req, res) => {
       });
     }
 
+    const userPass = user.password; // hashed password
+    const match = await bcrypt.compare(pass, userPass);
+
+    if (!match) {
+      return res.status(400).json({
+        success: false,
+        message: "failed to signed in",
+      });
+    }
+
+    // console.log(user.name);    // if signed in than it will create the jwt token
+    const token = await jwt.sign({ email: user.email }, PRIVATE_KEY, {
+      expiresIn: "1h",
+    });
+
     return res.status(200).json({
       success: true,
       messgae: "signed in successfully",
+      token: token,
     });
   } catch (err) {
     return res.status(400).json({

@@ -44,6 +44,17 @@ const CreateSchemasAndTables = async () => {
     await pgClient.query(userTableQuery);
     console.log("Table is created or already exits");
 
+    const projectTableQuery = `CREATE TABLE IF NOT EXISTS ps.projects_table(
+    id SERIAL PRIMARY KEY,
+    email VARCHAR(100) NOT NULL,
+    title VARCHAR(100) UNIQUE NOT NULL,
+    description VARCHAR(100) NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW()
+    )`;
+
+    await pgClient.query(projectTableQuery);
+    console.log("Project Table Created");
+
     // if more tables to be added ...
 
     // to query how schema is looking like
