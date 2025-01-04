@@ -20,8 +20,7 @@ async function ConnectDb() {
     // const response = await pgClient.query("SELECT version()");
     // console.log(response.rows[0]);
 
-    // await tables.CreateSchemasAndTables(); // Schemas and Tables
-    await CreateSchemasAndTables();
+    // await CreateSchemasAndTables();
   } catch (err) {
     console.log(err);
   }
@@ -30,22 +29,22 @@ async function ConnectDb() {
 const CreateSchemasAndTables = async () => {
   try {
     const schemaQuery = `CREATE SCHEMA IF NOT EXISTS ps`;
-    // await db.pgClient.query(schemaQuery);
+
     await pgClient.query(schemaQuery);
     console.log("Schema is created or already exists");
 
-    const tableQuery = `CREATE TABLE IF NOT EXISTS ps.users_table (
+    const userTableQuery = `CREATE TABLE IF NOT EXISTS ps.users_table (
       id SERIAL PRIMARY KEY,
       name VARCHAR(100) NOT NULL,
       email VARCHAR(100) UNIQUE NOT NULL,
-      password VARCHAR(200) UNIQUE NOT NULL,
+      password VARCHAR(200) NOT NULL,
       created_at TIMESTAMP NOT NULL DEFAULT NOW()
       )`;
-    // await db.pgClient.query(tableQuery);
-    await pgClient.query(tableQuery);
+
+    await pgClient.query(userTableQuery);
     console.log("Table is created or already exits");
 
-    // if more tables to be added
+    // if more tables to be added ...
 
     // to query how schema is looking like
     // const selectQuery = `SELECT column_name
@@ -55,16 +54,26 @@ const CreateSchemasAndTables = async () => {
     // const results = await pgClient.query(selectQuery);
 
     // console.log(results.rows);
-
-    // const insertQuery = `INSERT INTO ps.users_table ( name, email, pass, created_at)
-    //   VALUES ('sourav', 'sourav@gmail.com', 'sda2jdia3321dada', NOW());
-    // `;
-
-    // await pgClient.query(insertQuery);
-    // console.log("Sample data inserted");
   } catch (err) {
     console.log(err);
   }
 };
 
-module.exports = { pgClient, ConnectDb };
+const SetUserData = async ({ name, email, hashpass }) => {
+  try {
+    const userInputQuery = `
+      INSERT INTO ps.users_table (name, email, password, created_at)
+      VALUES ($1, $2, $3, NOW())
+      RETURNING id;
+    `;
+
+    console.log(hashpass);
+    const values = [name, email, hashpass];
+    const result = await pgClient.query(userInputQuery, values);
+    return await result.rows[0].id;
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+module.exports = { pgClient, ConnectDb, CreateSchemasAndTables, SetUserData };

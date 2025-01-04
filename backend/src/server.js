@@ -2,9 +2,9 @@ require("dotenv").config();
 const express = require("express");
 const { Client } = require("pg");
 
-const { PORT, PG_USER, PG_PASS, PG_HOST, PG_DATABASE } = process.env;
-
-const db = require("./db/index.js");  // database related
+const { PORT } = process.env;
+const db = require("./db/index.js"); // database related
+const UserRoutes = require("./routes/UserRoutes.js");
 
 const app = express();
 app.use(express.json());
@@ -15,13 +15,16 @@ async function main() {
   });
 
   await db.ConnectDb(); // Database connected
+  await db.CreateSchemasAndTables(); // tables required are created
 }
 
-app.get("/", (req, res) => {
+app.get("/", async (req, res) => {
   res.status(200).json({
     success: true,
     message: "Hey, Hii",
   });
 });
+
+app.use("/user", UserRoutes);
 
 main();
