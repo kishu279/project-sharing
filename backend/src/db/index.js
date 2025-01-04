@@ -61,7 +61,7 @@ const CreateSchemasAndTables = async () => {
 
 const SetUserData = async ({ name, email, hashpass }) => {
   try {
-    const userInputQuery = `
+    const userSetQuery = `
       INSERT INTO ps.users_table (name, email, password, created_at)
       VALUES ($1, $2, $3, NOW())
       RETURNING id;
@@ -69,11 +69,34 @@ const SetUserData = async ({ name, email, hashpass }) => {
 
     console.log(hashpass);
     const values = [name, email, hashpass];
-    const result = await pgClient.query(userInputQuery, values);
+    const result = await pgClient.query(userSetQuery, values);
     return await result.rows[0].id;
   } catch (err) {
     console.log(err);
   }
 };
 
-module.exports = { pgClient, ConnectDb, CreateSchemasAndTables, SetUserData };
+const GetUserData = async ({ email }) => {
+  try {
+    const userGetQuery = `
+      SELECT * 
+      FROM ps.users_table
+      WHERE email = $1
+    `;
+
+    const values = [email];
+    const user = await pgClient.query(userGetQuery, values);
+    return user.rows[0];
+  } catch (err) {
+    console.log(err);
+    throw err;
+  }
+};
+
+module.exports = {
+  pgClient,
+  ConnectDb,
+  CreateSchemasAndTables,
+  SetUserData,
+  GetUserData,
+};
