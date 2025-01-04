@@ -4,8 +4,7 @@ const { Client } = require("pg");
 
 const { PORT, PG_USER, PG_PASS, PG_HOST, PG_DATABASE } = process.env;
 
-// import * from "./db/index.js"
-const db = require("./db/index.js");
+const db = require("./db/index.js");  // database related
 
 const app = express();
 app.use(express.json());
