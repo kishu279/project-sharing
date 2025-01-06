@@ -1,10 +1,10 @@
 require("dotenv").config();
 const express = require("express");
-const { Client } = require("pg");
 
 const { PORT } = process.env;
 const db = require("./db/index.js"); // database related
 const UserRoutes = require("./routes/UserRoutes.js");
+const ProjectsRoutes = require("./routes/ProjectRoutes.js");
 
 const app = express();
 app.use(express.json());
@@ -26,5 +26,6 @@ app.get("/", async (req, res) => {
 });
 
 app.use("/user", UserRoutes);
+app.use("/projects", ProjectsRoutes);
 
 main();

@@ -44,9 +44,10 @@ const CreateSchemasAndTables = async () => {
     await pgClient.query(userTableQuery);
     console.log("Table is created or already exits");
 
+    // Project Table Query ...
     const projectTableQuery = `CREATE TABLE IF NOT EXISTS ps.projects_table(
     id SERIAL PRIMARY KEY,
-    email VARCHAR(100) NOT NULL,
+    userid INTEGER NOT NULL,
     title VARCHAR(100) UNIQUE NOT NULL,
     description VARCHAR(100) NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT NOW()
@@ -54,6 +55,15 @@ const CreateSchemasAndTables = async () => {
 
     await pgClient.query(projectTableQuery);
     console.log("Project Table Created");
+
+    // I USED ALTER TABLE ...
+    // const alterTable = `
+    // ALTER TABLE ps.projects_table
+    //   DROP COLUMN user_id
+    // `;
+
+    // await pgClient.query(alterTable);
+    // console.log("Project Table altered");
 
     // if more tables to be added ...
 
@@ -104,10 +114,36 @@ const GetUserData = async ({ email }) => {
   }
 };
 
+const GetIdFromEmail = async ({ email }) => {
+  try {
+    const idQuery = `
+      SELECT id FROM ps.users_table
+      WHERE email = $1
+    `;
+
+    const id = await pgClient.query(idQuery, [email]);
+    return id;
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+const SetTitleAndDescription = async ({ title, description, userId }) => {
+  const dataQuery = `
+    INSERT INTO ps.projects_table(title, description, userid)
+    VALUES($1, $2, $3)
+  `;
+  values = [title, description, userId];
+  await pgClient.query(dataQuery, values);
+  console.log("inserted the document successfully");
+};
+
 module.exports = {
   pgClient,
   ConnectDb,
   CreateSchemasAndTables,
   SetUserData,
   GetUserData,
+  GetIdFromEmail,
+  SetTitleAndDescription,
 };
