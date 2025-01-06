@@ -26,6 +26,6 @@ app.get("/", async (req, res) => {
 });
 
 app.use("/user", UserRoutes);
-app.use("/projects", ProjectsRoutes);
+app.use("/project", ProjectsRoutes);
 
 main();

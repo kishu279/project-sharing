@@ -29,4 +29,32 @@ router.post("/create", auth, async (req, res) => {
   });
 });
 
+router.patch("/update/:id", auth, async (req, res) => {
+  const { title, description } = req.body;
+  const id = req.params.id;
+
+  const result = await db.updateTitleAndDescription({ title, description, id });
+  return res.status(200).json({
+    success: true,
+    message: result,
+  });
+});
+
+router.get("/view", auth, async (req, res) => {
+  const emailId = req.emailId;
+
+  try {
+    const result = await db.viewProjects({ emailId });
+    return res.status(200).json({
+      success: true,
+      message: result,
+    });
+  } catch (err) {
+    return res.status(400).json({
+      success: false,
+      message: "something went wrong",
+    });
+  }
+});
+
 module.exports = router;

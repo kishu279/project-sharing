@@ -138,6 +138,59 @@ const SetTitleAndDescription = async ({ title, description, userId }) => {
   console.log("inserted the document successfully");
 };
 
+const updateTitleAndDescription = async ({ title, description, id }) => {
+  try {
+    await pgClient.query("BEGIN;");
+    await pgClient.query(
+      `
+        UPDATE ps.projects_table
+        SET title=$1
+        WHERE id=$2
+      `,
+      [title, id]
+    );
+
+    await pgClient.query(
+      `
+        UPDATE ps.projects_table
+        SET description=$1
+        WHERE id=$2
+      `,
+      [description, id]
+    );
+
+    await pgClient.query("COMMIT;");
+
+    return "SUCCESS";
+  } catch (err) {
+    await pgClient.query("ROLLBACK");
+    console.log(err);
+    return "FAILED";
+  }
+};
+
+const viewProjects = async ({ emailId }) => {
+  try {
+    // actual use of joins
+    // await pgClient.query("BEGIN");
+
+    const result = await pgClient.query(`
+        SELECT 
+          u.id,
+          u.name,
+          p.title,
+          p.description,
+          p.userid
+        FROM ps.users_table u
+        INNER JOIN ps.projects_table p
+          ON u.id = p.userid 
+      `);
+    return result;
+  } catch (err) {
+    return err;
+  }
+};
+
 module.exports = {
   pgClient,
   ConnectDb,
@@ -146,4 +199,6 @@ module.exports = {
   GetUserData,
   GetIdFromEmail,
   SetTitleAndDescription,
+  updateTitleAndDescription,
+  viewProjects,
 };
