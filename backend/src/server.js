@@ -28,4 +28,11 @@ app.get("/", async (req, res) => {
 app.use("/user", UserRoutes);
 app.use("/project", ProjectsRoutes);
 
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "http://localhost:5173/");
+  res.header("Access-Control-Allow-Headers", "Origin, Content-Type");
+  res.header("Access-Control-Allow-Methods", "GET, POST, PATCH, DELETE, PUT");
+  next();
+});
+
 main();
