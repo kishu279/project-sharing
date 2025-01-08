@@ -12,7 +12,7 @@ router.post("/signup", async (req, res) => {
   const { name, email, pass } = req.body;
 
   if (!name || !email || !pass) {
-    return res.status(200).json({
+    return res.status(400).json({
       success: false,
       message: "entry fields are necessary",
     });
@@ -82,7 +82,7 @@ router.post("/signin", async (req, res) => {
   } catch (err) {
     return res.status(400).json({
       success: false,
-      message: err,
+      message: "err",
     });
   }
 });

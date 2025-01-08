@@ -10,7 +10,6 @@ const ProjectsRoutes = require("./routes/ProjectRoutes.js");
 const app = express();
 app.use(express.json());
 
-
 // cors functionality
 // app.use(
 //   cors({
