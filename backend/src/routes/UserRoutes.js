@@ -2,6 +2,7 @@ require("dotenv").config();
 const expresss = require("express");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const cors = require("cors");
 
 const db = require("./../db/index.js");
 const { PRIVATE_KEY } = process.env;
@@ -85,5 +86,13 @@ router.post("/signin", async (req, res) => {
     });
   }
 });
+
+// router.use(
+//   cors({
+//     origin: "http://localhost:5173",
+//     methods: ["GET, PUT, DELETE, POST"],
+//     allowedHeaders: ["Content-Type", "Authorization"],
+//   })
+// );
 
 module.exports = router;

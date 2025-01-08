@@ -5,7 +5,7 @@ import Logo from "../components/Logo.jsx";
 export default function HomePage() {
   return (
     <nav className="">
-      <div className="border h-20 flex items-center justify-between">
+      <div className="shadow-md h-20 flex items-center justify-between">
         <Logo />
         <div className="flex items-center justify-end divide-x-2">
           <LoginButton />
@@ -16,7 +16,7 @@ export default function HomePage() {
         <div className="h-24 w-[600px] font-mono text-8xl text-left mt-8 ml-6 text-neutral-500">
           TeamFlow
         </div>
-        <p className="font-mono te  xt-2xl ml-10 mt-4 text-blue-400 tracking-widest">
+        <p className="font-mono text-2xl ml-10 mt-4 text-blue-400 tracking-widest">
           "Collaborate. Create. Conquer."
         </p>
         <p className="font-mono text-xl ml-10 mt-4 text-slate-500 tracking-tight h-[100px] w-[1400px]">

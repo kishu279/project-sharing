@@ -9,8 +9,10 @@ export default function Logo() {
   return (
     <div>
       <span
-        class="material-symbols-outlined cursor-pointer"
-        onClick={handleClick}
+        className="material-symbols-outlined cursor-pointer ml-5"
+        onClick={() => {
+          handleClick();
+        }}
       >
         diversity_2
       </span>
