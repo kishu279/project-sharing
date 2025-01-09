@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { UNSAFE_useFogOFWarDiscovery, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 export function SignUp() {
   const [name, setName] = useState("");

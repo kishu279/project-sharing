@@ -1,3 +1,156 @@
+import { useEffect, useState } from "react";
+import Logo from "../components/Logo.jsx";
+import { LoginButton, RegisterButton } from "./../components/Button.jsx";
+import { useRecoilState } from "recoil";
+import { dataAtom } from "../state/atom.jsx";
+import { useNavigate } from "react-router-dom";
+
 export default function Dashboard() {
-  return <div>Hey Hii this side sourav</div>;
+  const [datas, setDatas] = useRecoilState(dataAtom);
+  const [errmssg, setErrmssg] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  const [title, setTitle] = useState("");
+  const [select, setSelect] = useState("");
+  const [selectid, setSelectid] = useState("");
+
+  const navigation = useNavigate();
+
+  async function clickTitleSubmit() {
+    if (title.length === 0) {
+      console.log("no title");
+      return;
+    }
+
+    console.log("sending");
+    try {
+      const response = await fetch("http://localhost:3000/project/create", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("auth-token")}`,
+        },
+        body: JSON.stringify({
+          title: title,
+        }),
+      });
+
+      const body = await response.json();
+      if (!response.ok) {
+        throw new Error();
+      }
+
+      console.log(body.message);
+    } catch (err) {
+      throw new Error(err.message || "An unknown error expected");
+    }
+  }
+
+  useEffect(() => {
+    try {
+      const fetchData = async () => {
+        const res = await fetch("http://localhost:3000/project/view", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            authorization: `Bearer ${localStorage.getItem("auth-token")}`,
+          },
+        });
+
+        const body = await res.json();
+        if (!res.ok) {
+          setErrmssg(body.message || `HTTP err status: ${body.status}`);
+          return;
+        }
+
+        setDatas(body.message);
+      };
+
+      fetchData();
+    } catch (err) {
+      throw new Error(err.message || "An unknown error expected");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  if (loading) {
+    return <div>Loading ...</div>;
+  }
+
+  if (errmssg) {
+    return <div>{errmssg}</div>;
+  }
+
+  return (
+    <div>
+      <div className="shadow-md h-20 flex items-center justify-between">
+        <Logo />
+        <div className="flex items-center justify-end divide-x-2">
+          <LoginButton />
+          <RegisterButton />
+        </div>
+      </div>
+
+      <div className="flex justify-center mt-32">
+        <div className="w-[400px] flex justify-evenly">
+          <input
+            type="text"
+            value={title}
+            className="border rounded-md h-10 w-[250px] p-5"
+            placeholder="Titles ..."
+            onChange={(event) => {
+              setTitle(event.target.value);
+            }}
+          />
+          <button
+            className="border h-10 w-20 rounded-full"
+            onClick={() => {
+              clickTitleSubmit();
+              setTitle("");
+            }}
+          >
+            Click
+          </button>
+        </div>
+      </div>
+
+      <div className="display justify-items-center">
+        <div className="border h-[500px] w-[1000px] grid grid-cols-3 grid-row-5 overflow-scroll gap-4">
+          {/* className="border h-[500px] w-[1700px] display grow flex flex-wrap gap-4 shadow-lg rounded-lg" */}
+          {datas?.map((data) => (
+            <div
+              key={data.id}
+              className="ml-2 h-[100px] w-[300px] border text-wrap text-center shadow-lg hover:bg-blue-100"
+              onClick={() => {
+                setSelect(data.title);
+                setSelectid(data.id);
+                // --> REDIRECTING TO THE PAGE
+              }}
+            >
+              {data.id}
+              <h1>{data.title}</h1>
+              <h1>{data.description}</h1>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <div className="display text-center mt-10 flex justify-evenly select-none text-2xl display flex-col">
+          <p>title : {select}</p>
+          <span
+            className="material-symbols-outlined cursor-pointer "
+            onClick={() => {
+              // on click will check the select is filled or not
+              console.log("clicked");
+              navigation(`/project/${selectid}`);
+            }}
+          >
+            output
+          </span>
+        </div>
+      </div>
+    </div>
+  );
 }

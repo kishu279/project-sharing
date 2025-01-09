@@ -1,12 +1,11 @@
 require("dotenv").config();
 const jwt = require("jsonwebtoken");
-const express = require("express");
 
 const { PRIVATE_KEY } = process.env;
 
 const auth = async (req, res, next) => {
   const token = await req.headers["authorization"];
-  if (token.length === 0) {
+  if (!token) {
     return res.status(400).json({
       success: false,
       message: "Sign in again",
@@ -24,7 +23,7 @@ const auth = async (req, res, next) => {
 
       if (decoded) {
         req.emailId = decoded.email;
-        console.log(decoded.email);
+        // console.log(decoded.email);
         return next();
       }
     });

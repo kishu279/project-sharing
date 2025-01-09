@@ -7,7 +7,7 @@ const db = require("./../db/index");
 const router = express.Router();
 
 router.post("/create", auth, async (req, res) => {
-  const { title, description } = req.body;
+  const { title } = req.body;
 
   if (title.length === 0) {
     return res.status(400).json({
@@ -18,14 +18,13 @@ router.post("/create", auth, async (req, res) => {
 
   const email = req.emailId;
   const id = await db.GetIdFromEmail({ email });
-  // projects will be added
 
   const userId = id.rows[0].id;
-  await db.SetTitleAndDescription({ title, description, userId });
+  await db.SetTitleAndDescription({ title, userId });
 
   return res.status(200).json({
     success: true,
-    message: "Insertion of the data successfully",
+    message: "Inserted",
   });
 });
 
@@ -45,9 +44,20 @@ router.get("/view", auth, async (req, res) => {
 
   try {
     const result = await db.viewProjects({ emailId });
+    let count = 0;
+    let datas = [];
+
+    result.rows.map((data) => {
+      datas[count] = {
+        id: ++count,
+        title: data.title,
+        description: data.description,
+      };
+    });
+
     return res.status(200).json({
       success: true,
-      message: result,
+      message: datas,
     });
   } catch (err) {
     return res.status(400).json({

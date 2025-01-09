@@ -54,7 +54,19 @@ const CreateSchemasAndTables = async () => {
     )`;
 
     await pgClient.query(projectTableQuery);
-    console.log("Project Table Created");
+    console.log("Project table created");
+
+    const sharedTableQuery = `
+      CREATE TABLE IF NOT EXISTS ps.shared_table(
+        id SERIAL PRIMARY KEY,
+        userid INT NOT NULL,
+        projectid INT NOT NULL,
+        FOREIGN KEY (userid) REFERENCES ps.users_table(id) ON DELETE CASCADE,
+        FOREIGN KEY (projectid) REFERENCES ps.projects_table(id) ON DELETE CASCADE       
+      )`;
+
+    await pgClient.query(sharedTableQuery);
+    console.log("Shared table created");
 
     // I USED ALTER TABLE ...
     // const alterTable = `
@@ -66,16 +78,8 @@ const CreateSchemasAndTables = async () => {
     // console.log("Project Table altered");
 
     // if more tables to be added ...
-
-    // to query how schema is looking like
-    // const selectQuery = `SELECT column_name
-    // FROM information_schema.columns
-    // WHERE table_schema = 'ps' AND table_name = 'users_table'
-    // `;
-    // const results = await pgClient.query(selectQuery);
-
-    // console.log(results.rows);
   } catch (err) {
+    await pgClient.query(`ROLLBACK;`);
     console.log(err);
   }
 };
@@ -128,11 +132,13 @@ const GetIdFromEmail = async ({ email }) => {
   }
 };
 
-const SetTitleAndDescription = async ({ title, description, userId }) => {
+const SetTitleAndDescription = async ({ title, userId }) => {
+  const description = "";
   const dataQuery = `
     INSERT INTO ps.projects_table(title, description, userid)
     VALUES($1, $2, $3)
   `;
+
   values = [title, description, userId];
   await pgClient.query(dataQuery, values);
   console.log("inserted the document successfully");
