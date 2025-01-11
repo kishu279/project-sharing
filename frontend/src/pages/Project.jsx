@@ -12,6 +12,7 @@ export default function project() {
   const count = params.get("count");
 
   const [desc, setDesc] = useState("");
+  const [title, setTitle] = useState("");
 
   const datas = useRecoilValue(dataAtom);
   const data = datas[count]; // count is only for to check the data is there or not
@@ -24,6 +25,7 @@ export default function project() {
   // first rendered then add the data.description
   useEffect(() => {
     setDesc(data?.description);
+    setTitle(data?.title);
   }, []);
 
   async function handleSubmitDisc() {
@@ -47,6 +49,14 @@ export default function project() {
           }),
         }
       );
+
+      const body = await response.json();
+
+      if (!response.ok) {
+        throw new Error(body.message || `An HTTP error status: ${body.status}`);
+      }
+
+      console.log(body.message);
     } catch (err) {
       throw new Error(err.message || "An unknown error expected");
     }
@@ -56,6 +66,7 @@ export default function project() {
     <div>
       <div className="shadow-md h-20 flex items-center justify-between">
         <Logo />
+        <p>{data?.name}</p>
         <div className="flex items-center justify-end divide-x-2"></div>
       </div>
       <div>
