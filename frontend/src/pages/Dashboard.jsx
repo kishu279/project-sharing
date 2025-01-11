@@ -13,6 +13,7 @@ export default function Dashboard() {
   const [title, setTitle] = useState("");
   const [select, setSelect] = useState("");
   const [selectid, setSelectid] = useState("");
+  const [countid, setCountid] = useState("");
 
   const navigation = useNavigate();
 
@@ -116,23 +117,29 @@ export default function Dashboard() {
       </div>
 
       <div className="display justify-items-center">
-        <div className="border h-[500px] w-[1000px] grid grid-cols-3 grid-row-5 overflow-scroll gap-4">
+        <div className="border h-[300px] w-[1000px] grid grid-cols-3 grid-row-5 overflow-scroll gap-5">
           {/* className="border h-[500px] w-[1700px] display grow flex flex-wrap gap-4 shadow-lg rounded-lg" */}
-          {datas?.map((data) => (
-            <div
-              key={data.id}
-              className="ml-2 h-[100px] w-[300px] border text-wrap text-center shadow-lg hover:bg-blue-100"
-              onClick={() => {
-                setSelect(data.title);
-                setSelectid(data.id);
-                // --> REDIRECTING TO THE PAGE
-              }}
-            >
-              {data.id}
-              <h1>{data.title}</h1>
-              <h1>{data.description}</h1>
-            </div>
-          ))}
+          {datas?.length != 0 ? (
+            datas?.map((data) => (
+              <div
+                key={data.id}
+                className="ml-2 h-[100px] w-[300px] border text-wrap text-center shadow-lg hover:bg-blue-100 cursor-pointer"
+                onClick={() => {
+                  setSelect(data.title);
+                  setSelectid(data.id);
+                  setCountid(data.count);
+                  // --> REDIRECTING TO THE PAGE
+                  console.log(datas);
+                }}
+              >
+                {data.count + 1}
+                <h1>{data.title}</h1>
+                <h1>{data.description}</h1>
+              </div>
+            ))
+          ) : (
+            <h1 className="font-mono text-3xl">Create your first project</h1>
+          )}
         </div>
       </div>
 
@@ -144,7 +151,7 @@ export default function Dashboard() {
             onClick={() => {
               // on click will check the select is filled or not
               console.log("clicked");
-              navigation(`/project/${selectid}`);
+              navigation(`/project?id=${selectid}&count=${countid}`);
             }}
           >
             output

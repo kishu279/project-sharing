@@ -62,7 +62,7 @@ const CreateSchemasAndTables = async () => {
         userid INT NOT NULL,
         projectid INT NOT NULL,
         FOREIGN KEY (userid) REFERENCES ps.users_table(id) ON DELETE CASCADE,
-        FOREIGN KEY (projectid) REFERENCES ps.projects_table(id) ON DELETE CASCADE       
+        FOREIGN KEY (projectid) REFERENCES ps.projects_table(pid) ON DELETE CASCADE       
       )`;
 
     await pgClient.query(sharedTableQuery);
@@ -144,34 +144,53 @@ const SetTitleAndDescription = async ({ title, userId }) => {
   console.log("inserted the document successfully");
 };
 
-const updateTitleAndDescription = async ({ title, description, id }) => {
+const updateTitleAndDescription = async ({
+  title,
+  description,
+  id,
+  userid,
+}) => {
+  await pgClient.query("BEGIN;");
   try {
-    await pgClient.query("BEGIN;");
     await pgClient.query(
       `
         UPDATE ps.projects_table
         SET title=$1
-        WHERE id=$2
+        WHERE pid=$2 AND userid=$3
       `,
-      [title, id]
+      [title, id, userid]
     );
 
     await pgClient.query(
       `
         UPDATE ps.projects_table
         SET description=$1
-        WHERE id=$2
+        WHERE pid=$2 AND userid=$3
       `,
-      [description, id]
+      [description, id, userid]
     );
 
-    await pgClient.query("COMMIT;");
+    // await pgClient.query(
+    //   `
+    //     UPDATE ps.projects_table
+    //     SET title=$1,
+    //         description=$2
+
+    //     WHERE userid=$3 AND title=$4;
+    //   `,
+    //   [title, description, id, prevTitle]
+    // );
+
+    // await pgClient.query(`COMMIT;`);
 
     return "SUCCESS";
   } catch (err) {
     await pgClient.query("ROLLBACK");
     console.log(err);
     return "FAILED";
+  } finally {
+    await pgClient.query("COMMIT");
+    console.log("Finalized");
   }
 };
 
@@ -184,6 +203,7 @@ const viewProjects = async ({ emailId }) => {
         SELECT 
           u.id,
           u.name,
+          p.pid,
           p.title,
           p.description,
           p.userid

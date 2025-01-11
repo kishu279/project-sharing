@@ -29,10 +29,15 @@ router.post("/create", auth, async (req, res) => {
 });
 
 router.patch("/update/:id", auth, async (req, res) => {
-  const { title, description } = req.body;
+  const { title, description, userid } = req.body;
   const id = req.params.id;
 
-  const result = await db.updateTitleAndDescription({ title, description, id });
+  const result = await db.updateTitleAndDescription({
+    title,
+    description,
+    id,
+    userid,
+  });
   return res.status(200).json({
     success: true,
     message: result,
@@ -49,10 +54,14 @@ router.get("/view", auth, async (req, res) => {
 
     result.rows.map((data) => {
       datas[count] = {
-        id: ++count,
+        count: count,
+        id: data.pid,
+        name: data.name,
         title: data.title,
         description: data.description,
+        userid: data.userid,
       };
+      count++;
     });
 
     return res.status(200).json({
