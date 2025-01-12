@@ -76,4 +76,30 @@ router.get("/view", auth, async (req, res) => {
   }
 });
 
+router.delete("/remove/:id", auth, async (req, res) => {
+  const contentId = req.params.id;
+
+  try {
+    const response = await db.deleteProject({ contentId });
+    console.log(response);
+
+    if (response.rowCount > 0) {
+      console.log(response);
+      return res.status(200).json({
+        success: true,
+        message: "successfully deleted",
+      });
+    }
+    return res.status(400).json({
+      success: false,
+      message: "content not found",
+    });
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: "server error",
+    });
+  }
+});
+
 module.exports = router;

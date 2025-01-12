@@ -1,4 +1,4 @@
-import { useNavigate, useParams } from "react-router-dom";
+import { ServerRouter, useNavigate, useParams } from "react-router-dom";
 import { useRecoilValue } from "recoil";
 import { dataAtom } from "../state/atom";
 import Logo from "../components/Logo";
@@ -6,6 +6,9 @@ import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 
 export default function project() {
+  const [loading, setLoading] = useState(false);
+  const [errmssg, setErrmssg] = useState("");
+
   const location = useLocation();
   const params = new URLSearchParams(location.search);
   const id = params.get("id");
@@ -34,6 +37,7 @@ export default function project() {
     }
 
     try {
+      setLoading(true);
       const response = await fetch(
         `http://localhost:3000/project/update/${id}`,
         {
@@ -59,7 +63,47 @@ export default function project() {
       console.log(body.message);
     } catch (err) {
       throw new Error(err.message || "An unknown error expected");
+    } finally {
+      setLoading(false);
     }
+  }
+  async function handleClickDelete() {
+    setLoading(true);
+
+    try {
+      const response = await fetch(
+        `http://localhost:3000/project/remove/${id}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("auth-token")}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        const body = await response.json();
+        throw new Error(
+          body.message || `HTTP error status: ${response.status}`
+        );
+      }
+
+      console.log("Successfully deleted!");
+    } catch (err) {
+      console.error("Error in delete operation:", err);
+      setErrmssg(err.message || "An unknown error occurred");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  if (loading) {
+    return <div>Loading ...</div>;
+  }
+
+  if (errmssg) {
+    return <div>{errmssg}</div>;
   }
 
   return (
@@ -90,6 +134,20 @@ export default function project() {
             submit
           </button>
         </div>
+      </div>
+
+      <div>
+        <button
+          onClick={() => {
+            handleClickDelete();
+            const timer = setTimeout(() => {
+              navigation("/dashboard");
+            }, 500);
+            // clearTimeout(timer);
+          }}
+        >
+          Delete
+        </button>
       </div>
     </div>
   );

@@ -222,6 +222,21 @@ const viewProjects = async ({ emailId }) => {
   }
 };
 
+const deleteProject = async ({ contentId }) => {
+  try {
+    const response = await pgClient.query(
+      `DELETE FROM ps.projects_table
+      WHERE pid=$1
+      RETURNING pid;`,
+      [contentId]
+    );
+
+    return response;
+  } catch (err) {
+    return err;
+  }
+};
+
 module.exports = {
   pgClient,
   ConnectDb,
@@ -232,4 +247,5 @@ module.exports = {
   SetTitleAndDescription,
   updateTitleAndDescription,
   viewProjects,
+  deleteProject,
 };
