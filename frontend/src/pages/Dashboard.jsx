@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import Logo from "../components/Logo.jsx";
-import { LoginButton, RegisterButton } from "./../components/Button.jsx";
+import { Logout } from "./../components/Button.jsx";
 import { useRecoilState } from "recoil";
 import { dataAtom } from "../state/atom.jsx";
 import { useNavigate } from "react-router-dom";
@@ -38,41 +38,45 @@ export default function Dashboard() {
 
       const body = await response.json();
       if (!response.ok) {
+        // setTimeout(() => {}, 2000);
+
+        // navigation("/signin");
         throw new Error();
       }
 
       console.log(body.message);
     } catch (err) {
+      // navigation("/signin");
       throw new Error(err.message || "An unknown error expected");
     }
   }
 
-  useEffect(() => {
+  async function fetchData() {
+    setLoading(true);
     try {
-      const fetchData = async () => {
-        const res = await fetch("http://localhost:3000/project/view", {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            authorization: `Bearer ${localStorage.getItem("auth-token")}`,
-          },
-        });
+      const response = await fetch("http://localhost:3000/project/view", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("auth-token")}`,
+        },
+      });
 
-        const body = await res.json();
-        if (!res.ok) {
-          setErrmssg(body.message || `HTTP err status: ${body.status}`);
-          return;
-        }
-
-        setDatas(body.message);
-      };
-
-      fetchData();
+      const body = await response.json();
+      if (!response.ok) {
+        setErrmssg(body.message || `An Error status: ${body.status}`);
+        return;
+      }
+      setDatas(body.message);
     } catch (err) {
       throw new Error(err.message || "An unknown error expected");
     } finally {
       setLoading(false);
     }
+  }
+
+  useEffect(() => {
+    fetchData();
   }, []);
 
   if (loading) {
@@ -80,6 +84,7 @@ export default function Dashboard() {
   }
 
   if (errmssg) {
+    navigation("/signin");
     return <div>{errmssg}</div>;
   }
 
@@ -88,8 +93,7 @@ export default function Dashboard() {
       <div className="shadow-md h-20 flex items-center justify-between">
         <Logo />
         <div className="flex items-center justify-end divide-x-2">
-          <LoginButton />
-          <RegisterButton />
+          <Logout />
         </div>
       </div>
 

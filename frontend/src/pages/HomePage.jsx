@@ -1,5 +1,5 @@
 import { Outlet } from "react-router-dom";
-import { LoginButton, RegisterButton } from "./../components/Button.jsx";
+import { Goto, LoginButton, RegisterButton } from "./../components/Button.jsx";
 import Logo from "../components/Logo.jsx";
 
 export default function HomePage() {
@@ -25,6 +25,9 @@ export default function HomePage() {
           ensuring efficient workflows and successful outcomes for every team
           member involved.
         </p>
+      </div>
+      <div className="">
+        <Goto />
       </div>
       <Outlet />
     </nav>

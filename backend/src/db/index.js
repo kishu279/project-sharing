@@ -199,18 +199,23 @@ const viewProjects = async ({ emailId }) => {
     // actual use of joins
     // await pgClient.query("BEGIN");
 
-    const result = await pgClient.query(`
+    const result = await pgClient.query(
+      `
         SELECT 
+          u.email,
           u.id,
           u.name,
           p.pid,
           p.title,
           p.description,
           p.userid
-        FROM ps.users_table u
-        INNER JOIN ps.projects_table p
+          FROM ps.users_table u
+          INNER JOIN ps.projects_table p
           ON u.id = p.userid 
-      `);
+          WHERE u.email=$1
+          `,
+      [emailId]
+    );
     return result;
   } catch (err) {
     return err;

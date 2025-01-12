@@ -36,3 +36,36 @@ export const RegisterButton = () => {
     </div>
   );
 };
+
+export function Logout() {
+  const navigation = useNavigate();
+  return (
+    <div>
+      <button
+        className="border h-12 w-20 rounded-full mr-5 shadow-lg hover:bg-slate-400"
+        onClick={() => {
+          localStorage.clear();
+          navigation("/");
+        }}
+      >
+        Logout
+      </button>
+    </div>
+  );
+}
+
+export function Goto() {
+  const navigation = useNavigate();
+  return (
+    <div
+      className="flex justify-center select-none cursor-pointer"
+      onClick={() => {
+        navigation("/dashboard");
+      }}
+    >
+      <p className="font-mono text-3xl text-cyan-500 h-12 w-[200px] text-center shadow-md rounded-full  hover:shadow-cyan-400">
+        Dashboard
+      </p>
+    </div>
+  );
+}
