@@ -46,7 +46,7 @@ const CreateSchemasAndTables = async () => {
 
     // Project Table Query ...
     const projectTableQuery = `CREATE TABLE IF NOT EXISTS ps.projects_table(
-    id SERIAL PRIMARY KEY,
+    pid uuid DEFAULT gen_random_uuid(),
     userid INTEGER NOT NULL,
     title VARCHAR(100) UNIQUE NOT NULL,
     description VARCHAR(100) NOT NULL,
@@ -56,19 +56,43 @@ const CreateSchemasAndTables = async () => {
     await pgClient.query(projectTableQuery);
     console.log("Project table created");
 
-    const sharedTableQuery = `
-      CREATE TABLE IF NOT EXISTS ps.shared_table(
-        id SERIAL PRIMARY KEY,
-        userid INT NOT NULL,
-        projectid INT NOT NULL,
-        FOREIGN KEY (userid) REFERENCES ps.users_table(id) ON DELETE CASCADE,
-        FOREIGN KEY (projectid) REFERENCES ps.projects_table(pid) ON DELETE CASCADE       
-      )`;
+    const sharedTableQuery = `CREATE TABLE IF NOT EXISTS ps.shared_table (
+      sid uuid DEFAULT gen_random_uuid(),
+      pid uuid NOT NULL,
+      uid INTEGER NOT NULL,
+      CONSTRAINT fk_sharedTable_pid FOREIGN KEY (pid)
+      REFERENCES ps.projects_table(pid)
+      ON UPDATE NO ACTION ON DELETE CASCADE,
+      CONSTRAINT fk_sharedTable_uid FOREIGN KEY (uid)
+      REFERENCES ps.users_table(id)
+      ON UPDATE NO ACTION ON DELETE CASCADE
+      )
+      `;
 
     await pgClient.query(sharedTableQuery);
-    console.log("Shared table created");
 
-    // I USED ALTER TABLE ...
+    // await pgClient.query('CREATE EXTENSION IF NOT EXISTS "uuid-ossp"');
+    // await pgClient.query("BEGIN");
+    // await pgClient.query(`
+    //     ALTER TABLE ps.projects_table
+    //     DROP CONSTRAINT IF EXISTS projects_table_pkey;
+    //   `); // Drop primary key constraint
+
+    // await pgClient.query(`
+    //     ALTER TABLE ps.projects_table
+    //     DROP COLUMN IF EXISTS pid;
+    //     `); // Drop the existing pid column (if exists)
+
+    // await pgClient.query("CREATE EXTENSION IF NOT EXISTS pgcrypto;"); // Create extension for uuid generation (if not already created)
+
+    // await pgClient.query(`
+    //   ALTER TABLE ps.projects_table
+    //   ADD COLUMN pid UUID PRIMARY KEY DEFAULT gen_random_uuid();
+    //   `); // Add the new pid column with UUID as primary key
+
+    // await pgClient.query("COMMIT;"); // Commit the transaction
+    // console.log("Table altered successfully.");
+
     // const alterTable = `
     // ALTER TABLE ps.projects_table
     //   DROP COLUMN user_id
@@ -118,28 +142,14 @@ const GetUserData = async ({ email }) => {
   }
 };
 
-const GetIdFromEmail = async ({ email }) => {
-  try {
-    const idQuery = `
-      SELECT id FROM ps.users_table
-      WHERE email = $1
-    `;
-
-    const id = await pgClient.query(idQuery, [email]);
-    return id;
-  } catch (err) {
-    console.log(err);
-  }
-};
-
-const SetTitleAndDescription = async ({ title, userId }) => {
+const SetTitleAndDescription = async ({ title, userId, pid }) => {
   const description = "";
   const dataQuery = `
-    INSERT INTO ps.projects_table(title, description, userid)
-    VALUES($1, $2, $3)
+    INSERT INTO ps.projects_table(title, description, userid, pid)
+    VALUES($1, $2, $3, $4)
   `;
 
-  values = [title, description, userId];
+  values = [title, description, userId, pid];
   await pgClient.query(dataQuery, values);
   console.log("inserted the document successfully");
 };
@@ -237,15 +247,30 @@ const deleteProject = async ({ contentId }) => {
   }
 };
 
+const sharedTable = async ({ pid, userId }) => {
+  try {
+    const response = await pgClient.query(
+      `
+      INSERT INTO ps.shared_table(pid, uid)
+      VALUES ($1, $2)
+      RETURNING uid`,
+      [pid, userId]
+    );
+    return response;
+  } catch (err) {
+    return err;
+  }
+};
+
 module.exports = {
   pgClient,
   ConnectDb,
   CreateSchemasAndTables,
   SetUserData,
   GetUserData,
-  GetIdFromEmail,
   SetTitleAndDescription,
   updateTitleAndDescription,
   viewProjects,
   deleteProject,
+  sharedTable,
 };

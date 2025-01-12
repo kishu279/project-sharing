@@ -1,5 +1,6 @@
 require("dotenv").config();
 const express = require("express");
+const { v4: uuid4 } = require("uuid");
 
 const auth = require("./../middleware/Auth");
 const db = require("./../db/index");
@@ -17,10 +18,16 @@ router.post("/create", auth, async (req, res) => {
   }
 
   const email = req.emailId;
-  const id = await db.GetIdFromEmail({ email });
+  const id = await db.GetUserData({ email });
 
-  const userId = id.rows[0].id;
-  await db.SetTitleAndDescription({ title, userId });
+  const pid = uuid4();
+  console.log(pid);
+
+  const userId = id.id;
+  await db.SetTitleAndDescription({ title, userId, pid });
+
+  const response = await db.sharedTable({ pid, userId });
+  console.log(response);
 
   return res.status(200).json({
     success: true,

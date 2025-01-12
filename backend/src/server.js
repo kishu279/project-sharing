@@ -19,21 +19,21 @@ app.use(
   })
 );
 
-app.options("*", cors());
+// app.use((req, res, next) => {
+//   res.header("Access-Control-Allow-Origin", "http://localhost:5173");
+//   res.header(
+//     "Access-Control-Allow-Method",
+//     "POST, GET, DELETE, PATCH, PUT, OPTIONS"
+//   );
+//   res.header(
+//     "Access-Control-Allow-Headers",
+//     "Content-Type, Origin, X-Requested-With, Authorization, Accept"
+//   );
+  
+//   next();
+// });
 
-app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "http://localhost:5173");
-  res.header(
-    "Access-Control-Allow-Method",
-    "POST, GET, DELETE, PATCH, PUT, OPTIONS"
-  );
-  res.header(
-    "Access-Control-Allow-Headers",
-    "Content-Type, Origin, X-Requested-With, Authorization, Accept"
-  );
-
-  next();
-});
+// app.options("*", cors());
 
 app.get("/", async (req, res) => {
   res.status(200).json({
